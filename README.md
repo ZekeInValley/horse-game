@@ -1,34 +1,40 @@
-# 示例游戏
+# 马儿游戏 / Horse Game（微信小游戏）
 
-示例相关说明查阅[新手教程](https://developers.weixin.qq.com/minigame/dev/guide/develop/start.html)
+多人同步的「几匹马 / 出发 / 扣喽」反应类小游戏。
 
-## 源码目录介绍
+A multiplayer reaction mini-game for WeChat: shout the right command — *N horses* / *Go* / *Kou* — in turn.
 
-```
-├── audio                                      // 音频资源
-├── images                                     // 图片资源
-├── js
-│   ├── base
-│   │   ├── animatoin.js                       // 帧动画的简易实现
-│   │   ├── pool.js                            // 对象池的简易实现
-│   │   └── sprite.js                          // 游戏基本元素精灵类
-│   ├── libs
-│   │   └── tinyemitter.js                     // 事件监听和触发
-│   ├── npc
-│   │   └── enemy.js                           // 敌机类
-│   ├── player
-│   │   ├── bullet.js                          // 子弹类
-│   │   └── index.js                           // 玩家类
-│   ├── runtime
-│   │   ├── background.js                      // 背景类
-│   │   ├── gameinfo.js                        // 用于展示分数和结算界面
-│   │   └── music.js                           // 全局音效管理器
-│   ├── databus.js                             // 管控游戏状态
-│   ├── main.js                                // 游戏入口主函数
-│   └── render.js                              // 基础渲染信息
-├── .eslintrc.js                               // 代码规范
-├── game.js                                    // 游戏逻辑主入口
-├── game.json                                  // 游戏运行时配置
-├── project.config.json                        // 项目配置
-└── project.private.config.json                // 项目个人配置
-```
+---
+
+## 功能 / Features
+
+- 单机 / 多人房间  
+  Single-player and multiplayer rooms
+- 云开发数据库同步（房主权威）  
+  Cloud database sync with host-authority model
+- 大厅占座、准备、开始  
+  Lobby: take a seat, ready up, start game
+- 房间 10 分钟空闲自动清空  
+  Auto-clear idle rooms after 10 minutes of inactivity
+
+---
+
+## 运行 / How to Run
+
+1. 用微信开发者工具打开本项目  
+   Open this project in WeChat DevTools
+2. 配置云开发环境，创建 `rooms` 集合  
+   Set up Cloud Base and create a `rooms` collection
+3. 权限：开发阶段可读可写  
+   Permissions: read/write for all users during development
+4. 编译预览 / 真机调试  
+   Compile & preview, or debug on a real device
+
+---
+
+## 技术 / Tech Stack
+
+- 微信小游戏 Canvas  
+  WeChat Mini Game Canvas
+- 微信云开发 Database + watch  
+  WeChat Cloud Base Database + realtime `watch`
