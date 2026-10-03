@@ -1,74 +1,121 @@
-/**
- * 音频/音效管理器 (SoundManager.js)
- * 封装微信小游戏 wx.createInnerAudioContext 接口，支持快速重置播放
- */
 class SoundManager {
   constructor() {
-      this.sounds = {};
-      
-      // 建议的音效资源路径（可替换为项目本地路径或远程 CDN URL）
-      this.soundSources = {
-          // 1. 三种核心马儿动作音效
-          horse: 'audio/horse_neigh.mp3',   // “一匹马”：清脆响亮的马嘶鸣声
-          start: 'audio/horse_gallop.mp3',  // “出发”：短促急促的马蹄奔跑声
-          kou:   'audio/horse_hoof.mp3',    // “扣喽”：清晰干脆的马蹄踩地/木踏声
-          
-          // 2. 辅助游戏反馈音效
-          error: 'audio/wrong.mp3',         // 犯错/扣血/超时提示音
-          win:   'audio/win.mp3',           // 胜利/通关欢呼音效
-          go:    'audio/start_go.mp3'       // 3,2,1倒计时结束 GO 音效
-      };
+    this.sounds = {};
+    this._bgmOn = false;
+    this._wantBgm = false;
+    this.muted = false;
 
-      this.init();
+    try {
+      this.muted = !!wx.getStorageSync('horse_muted');
+    } catch (e) {}
+
+    this.soundSources = {
+      horse: 'audio/horse_neigh.mp3',
+      start: 'audio/horse_gallop.mp3',
+      kou:   'audio/horse_hoof.mp3',
+      error: 'audio/wrong.mp3',
+      win:   'audio/win.mp3',
+      go:    'audio/start_go.mp3',
+      click: 'audio/click.mp3',
+      bgm:   'audio/bgm.mp3'
+    };
+
+    this.init();
   }
 
   init() {
-      // 预加载所有音效资源
-      for (let key in this.soundSources) {
-          try {
-              const audio = wx.createInnerAudioContext();
-              audio.src = this.soundSources[key];
-              this.sounds[key] = audio;
-          } catch (e) {
-              console.warn('创建音频上下文失败:', key, e);
-          }
+    for (let key in this.soundSources) {
+      try {
+        const audio = wx.createInnerAudioContext();
+        audio.src = this.soundSources[key];
+        if (key === 'bgm') {
+          audio.loop = true;
+          audio.volume = 0.45;
+        }
+        this.sounds[key] = audio;
+      } catch (e) {
+        console.warn('创建音频上下文失败:', key, e);
       }
+    }
   }
 
-  /**
-   * 基础播放方法：重置进度并播放
-   */
+  isMuted() {
+    return !!this.muted;
+  }
+
+  setMuted(muted) {
+    this.muted = !!muted;
+    try {
+      wx.setStorageSync('horse_muted', this.muted);
+    } catch (e) {}
+
+    if (this.muted) {
+      const bgm = this.sounds.bgm;
+      if (bgm) {
+        try { bgm.stop(); } catch (e) {}
+      }
+      this._bgmOn = false;
+    } else if (this._wantBgm) {
+      this._bgmOn = false;
+      this.playBgm();
+    }
+  }
+
+  toggleMute() {
+    this.setMuted(!this.muted);
+    return this.muted;
+  }
+
   playSound(key) {
-      if (this.sounds[key]) {
-          try {
-              this.sounds[key].stop(); // 先停止，防止快速连续点击时没声音
-              this.sounds[key].play();
-          } catch (e) {
-              console.error('播放音效出错:', key, e);
-          }
-      }
+    if (this.muted || !this.sounds[key]) return;
+    try {
+      this.sounds[key].stop();
+      this.sounds[key].seek(0);
+      this.sounds[key].play();
+    } catch (e) {
+      console.error('播放音效出错:', key, e);
+    }
   }
 
-  // --- 专门的动作音效调用 ---
   playHorse() { this.playSound('horse'); }
   playStart() { this.playSound('start'); }
   playKou()   { this.playSound('kou'); }
-  
-  // --- 游戏状态音效调用 ---
   playError() { this.playSound('error'); }
   playWin()   { this.playSound('win'); }
   playGo()    { this.playSound('go'); }
+  playClick() { this.playSound('click'); }
 
-  /**
-   * 销毁所有音频上下文，释放资源
-   */
+  playBgm() {
+    this._wantBgm = true;
+    const bgm = this.sounds.bgm;
+    if (!bgm || this.muted || this._bgmOn) return;
+    this._bgmOn = true;
+    try {
+      bgm.play();
+    } catch (e) {
+      this._bgmOn = false;
+      console.error('播放 BGM 出错:', e);
+    }
+  }
+
+  stopBgm() {
+    this._wantBgm = false;
+    const bgm = this.sounds.bgm;
+    if (!bgm) return;
+    this._bgmOn = false;
+    try {
+      bgm.stop();
+    } catch (e) {
+      console.error('停止 BGM 出错:', e);
+    }
+  }
+
   destroy() {
-      for (let key in this.sounds) {
-          if (this.sounds[key]) {
-              this.sounds[key].destroy();
-          }
-      }
-      this.sounds = {};
+    this.stopBgm();
+    for (let key in this.sounds) {
+      if (this.sounds[key]) this.sounds[key].destroy();
+    }
+    this.sounds = {};
   }
 }
 

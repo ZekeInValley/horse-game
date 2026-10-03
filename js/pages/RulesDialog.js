@@ -1,8 +1,9 @@
 const UI = require('../base/UI');
+const SoundManager = require('../base/SoundManager');
 
 function RulesDialog() {}
 
-RulesDialog.prototype.render = function(ctx, windowWidth, windowHeight) {
+RulesDialog.prototype.render = function (ctx, windowWidth, windowHeight) {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
     ctx.fillRect(0, 0, windowWidth, windowHeight);
 
@@ -39,7 +40,7 @@ RulesDialog.prototype.render = function(ctx, windowWidth, windowHeight) {
         "5. 终极赢家：坚持到最后一刻的角色获得胜利！"
     ];
 
-    rules.forEach(function(line, index) {
+    rules.forEach(function (line, index) {
         ctx.fillText(line, cardX + 30, cardY + 85 + index * 30);
     });
 
@@ -47,13 +48,14 @@ RulesDialog.prototype.render = function(ctx, windowWidth, windowHeight) {
     ctx.restore();
 };
 
-RulesDialog.prototype.handleTouch = function(x, y, windowWidth, windowHeight, changeScene) {
+RulesDialog.prototype.handleTouch = function (x, y, windowWidth, windowHeight, changeScene) {
     const cardH = windowHeight * 0.82;
     const cardY = (windowHeight - cardH) / 2;
     const closeBtnX = windowWidth / 2 - 65;
     const closeBtnY = cardY + cardH - 55;
 
     if (x >= closeBtnX && x <= closeBtnX + 130 && y >= closeBtnY && y <= closeBtnY + 42) {
+        SoundManager.playClick();
         changeScene(1);
     }
 };

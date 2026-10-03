@@ -1,23 +1,23 @@
 const UI = require('../base/UI');
+const SoundManager = require('../base/SoundManager');
 
 function ResultStage() {
     this.players = [];
     this.winnerName = '';
     this.onRestart = null;
     this.onBackHome = null;
-
     this.btn1Area = { x: 0, y: 0, w: 0, h: 0 };
     this.btn2Area = { x: 0, y: 0, w: 0, h: 0 };
 }
 
-ResultStage.prototype.init = function(players, winnerName, onRestart, onBackHome) {
+ResultStage.prototype.init = function (players, winnerName, onRestart, onBackHome) {
     this.players = players || [];
     this.winnerName = winnerName || '';
     this.onRestart = onRestart;
     this.onBackHome = onBackHome;
 };
 
-ResultStage.prototype.render = function(ctx, windowWidth, windowHeight) {
+ResultStage.prototype.render = function (ctx, windowWidth, windowHeight) {
     ctx.save();
 
     ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
@@ -25,7 +25,6 @@ ResultStage.prototype.render = function(ctx, windowWidth, windowHeight) {
 
     const count = this.players.length || 6;
     const dialogW = Math.min(360, windowWidth - 40);
-    // 随人数增高，避免 6 人列表被裁切
     const dialogH = Math.min(windowHeight - 40, 120 + count * 30 + 70);
     const x = (windowWidth - dialogW) / 2;
     const y = (windowHeight - dialogH) / 2;
@@ -40,8 +39,7 @@ ResultStage.prototype.render = function(ctx, windowWidth, windowHeight) {
     ctx.textBaseline = 'middle';
     ctx.fillText('🏆 最终排行榜 🏆', windowWidth / 2, y + 38);
 
-    // 按 rank 升序；无 rank 的排最后
-    const sortedPlayers = this.players.slice().sort(function(a, b) {
+    const sortedPlayers = this.players.slice().sort(function (a, b) {
         const ra = (a.rank > 0) ? a.rank : 99;
         const rb = (b.rank > 0) ? b.rank : 99;
         if (ra !== rb) return ra - rb;
@@ -51,7 +49,7 @@ ResultStage.prototype.render = function(ctx, windowWidth, windowHeight) {
     const startListY = y + 75;
     const rowH = 28;
 
-    sortedPlayers.forEach(function(p, i) {
+    sortedPlayers.forEach(function (p, i) {
         const rowY = startListY + i * rowH;
         const showRank = (p.rank > 0) ? p.rank : (i + 1);
 
@@ -93,7 +91,6 @@ ResultStage.prototype.render = function(ctx, windowWidth, windowHeight) {
     const btnH = 42;
     const btnY = y + dialogH - 56;
     const btnGap = 16;
-
     const btn1X = windowWidth / 2 - btnW - btnGap / 2;
     const btn2X = windowWidth / 2 + btnGap / 2;
 
@@ -106,7 +103,7 @@ ResultStage.prototype.render = function(ctx, windowWidth, windowHeight) {
     ctx.restore();
 };
 
-ResultStage.prototype.handleTouch = function(x, y, windowWidth, windowHeight, changeScene) {
+ResultStage.prototype.handleTouch = function (x, y, windowWidth, windowHeight, changeScene) {
     let b1 = this.btn1Area;
     let b2 = this.btn2Area;
 
@@ -114,31 +111,25 @@ ResultStage.prototype.handleTouch = function(x, y, windowWidth, windowHeight, ch
         const count = this.players.length || 6;
         const dialogH = Math.min(windowHeight - 40, 120 + count * 30 + 70);
         const dialogY = (windowHeight - dialogH) / 2;
-
         const btnW = 120;
         const btnH = 42;
         const btnY = dialogY + dialogH - 56;
         const btnGap = 16;
-
         b1 = { x: windowWidth / 2 - btnW - btnGap / 2, y: btnY, w: btnW, h: btnH };
         b2 = { x: windowWidth / 2 + btnGap / 2, y: btnY, w: btnW, h: btnH };
     }
 
     if (x >= b1.x && x <= b1.x + b1.w && y >= b1.y && y <= b1.y + b1.h) {
-        if (typeof this.onBackHome === 'function') {
-            this.onBackHome(changeScene);
-        } else if (typeof changeScene === 'function') {
-            changeScene(1);
-        }
+        SoundManager.playClick();
+        if (typeof this.onBackHome === 'function') this.onBackHome(changeScene);
+        else if (typeof changeScene === 'function') changeScene(1);
         return true;
     }
 
     if (x >= b2.x && x <= b2.x + b2.w && y >= b2.y && y <= b2.y + b2.h) {
-        if (typeof this.onRestart === 'function') {
-            this.onRestart(changeScene);
-        } else if (typeof changeScene === 'function') {
-            changeScene(3);
-        }
+        SoundManager.playClick();
+        if (typeof this.onRestart === 'function') this.onRestart(changeScene);
+        else if (typeof changeScene === 'function') changeScene(3);
         return true;
     }
 
